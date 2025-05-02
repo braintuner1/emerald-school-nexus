@@ -12,10 +12,10 @@ $pageHeader = 'Students';
 $pageSubheader = 'Manage student records and information';
 
 $headerAction = '
-    <button class="btn btn-primary" id="addStudentBtn">
+    <a href="add-students.php" class="btn btn-primary" id="addStudentBtn">
         <i class="fas fa-plus"></i>
         Add New Student
-    </button>
+    </a>
 ';
 
 $additionalCSS = ['assets/css/students.css'];

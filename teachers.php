@@ -11,10 +11,10 @@ $pageSubheader = 'Manage teacher records';
 $additionalJS = ['assets/js/teachers.js'];
 
 // Add New Teacher action button
-$headerAction = '<button class="btn btn-primary" id="addTeacherBtn">
+$headerAction = '<a href="add-teachers.php" class="btn btn-primary" id="addTeacherBtn">
                     <i class="fas fa-plus-circle"></i>
                     Add New Teacher
-                </button>';
+                </a>';
 
 include 'includes/header.php';
 ?>
@@ -125,86 +125,6 @@ include 'includes/header.php';
         <p class="summary-label">Female</p>
         <p class="summary-value" id="femaleTeachers">0</p>
       </div>
-    </div>
-  </div>
-</div>
-
-<!-- Add Teacher Modal -->
-<div id="addTeacherModal" class="modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h2>Add New Teacher</h2>
-      <button class="close-modal">&times;</button>
-    </div>
-    <div class="modal-body">
-      <form id="addTeacherForm">
-        <div class="form-row">
-          <div class="form-group">
-            <label for="firstName">First Name *</label>
-            <input type="text" id="firstName" name="firstName" class="form-input" required>
-          </div>
-          <div class="form-group">
-            <label for="lastName">Last Name *</label>
-            <input type="text" id="lastName" name="lastName" class="form-input" required>
-          </div>
-        </div>
-        
-        <div class="form-row">
-          <div class="form-group">
-            <label for="staffId">Staff ID *</label>
-            <input type="text" id="staffId" name="staffId" class="form-input" required>
-          </div>
-          <div class="form-group">
-            <label for="gender">Gender *</label>
-            <select id="gender" name="gender" class="form-select" required>
-              <option value="">Select gender</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-            </select>
-          </div>
-        </div>
-        
-        <div class="form-group">
-          <label for="email">Email *</label>
-          <input type="email" id="email" name="email" class="form-input" required>
-        </div>
-        
-        <div class="form-group">
-          <label>Subjects Taught *</label>
-          <div id="subjectsContainer">
-            <div class="subject-row">
-              <select name="subjects[]" class="form-select subject-select" required>
-                <option value="">Select subject</option>
-                <option value="Mathematics">Mathematics</option>
-                <option value="English">English</option>
-                <option value="Kiswahili">Kiswahili</option>
-                <option value="Science">Science</option>
-                <option value="Social Studies">Social Studies</option>
-                <option value="Physics">Physics</option>
-                <option value="Chemistry">Chemistry</option>
-                <option value="Biology">Biology</option>
-                <option value="Geography">Geography</option>
-                <option value="History">History</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        
-        <div class="form-group">
-          <label for="classAssigned">Class Assigned</label>
-          <select id="classAssigned" name="classAssigned" class="form-select">
-            <option value="">None</option>
-            <option value="Form 1">Form 1</option>
-            <option value="Form 2">Form 2</option>
-            <option value="Form 3">Form 3</option>
-            <option value="Form 4">Form 4</option>
-          </select>
-        </div>
-      </form>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline" id="cancelTeacherBtn">Cancel</button>
-      <button class="btn btn-primary" id="saveTeacherBtn">Save Teacher</button>
     </div>
   </div>
 </div>
