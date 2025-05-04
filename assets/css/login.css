@@ -7,6 +7,34 @@
   justify-content: center;
   align-items: center;
   padding: 1rem;
+  position: relative; /* Added for absolute positioning of admin button */
+}
+
+.login-header-actions {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 10;
+}
+
+.admin-login-btn, 
+.teacher-login-btn {
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.admin-login-btn {
+  background-color: var(--secondary);
+  color: white;
+}
+
+.admin-login-btn:hover {
+  background-color: var(--primary);
 }
 
 .login-container {

@@ -1,0 +1,22 @@
+
+# Make login.php the default page
+DirectoryIndex login.php
+
+# Prevent direct access to protected files
+<Files "config.php">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+# Redirect to login page if not logged in
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    # Excluded files/directories from authentication check
+    RewriteCond %{REQUEST_URI} !^/login\.php
+    RewriteCond %{REQUEST_URI} !^/assets/
+    RewriteCond %{REQUEST_URI} !^/logout\.php
+    # Check if session variable user_id is not set
+    RewriteCond %{HTTP_COOKIE} !user_id [NC]
+    # Redirect to login page
+    RewriteRule ^(.*)$ login.php [L,R=302]
+</IfModule>

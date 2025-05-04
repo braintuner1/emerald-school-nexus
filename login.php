@@ -9,37 +9,42 @@ if (isLoggedIn()) {
 }
 
 $error = '';
+$isAdminLogin = isset($_GET['admin']) && $_GET['admin'] == 1;
 
 // Handle login form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $phone = sanitizeInput($_POST['phone']);
     $password = $_POST['password'];
     
-    // First try admin login
-    $adminQuery = "SELECT * FROM admins WHERE phone_number = ?";
-    $stmt = $conn->prepare($adminQuery);
-    $stmt->bind_param("s", $phone);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    
-    if ($result->num_rows == 1) {
-        $admin = $result->fetch_assoc();
+    if ($isAdminLogin) {
+        // Admin login attempt
+        $adminQuery = "SELECT * FROM admins WHERE phone_number = ?";
+        $stmt = $conn->prepare($adminQuery);
+        $stmt->bind_param("s", $phone);
+        $stmt->execute();
+        $result = $stmt->get_result();
         
-        // Verify password (in production use password_verify)
-        if ($password === $admin['password']) {
-            // Set session variables for admin
-            $_SESSION['user_id'] = $admin['id'];
-            $_SESSION['username'] = $admin['name'];
-            $_SESSION['role'] = 'admin';
+        if ($result->num_rows == 1) {
+            $admin = $result->fetch_assoc();
             
-            // Redirect to dashboard
-            header("Location: index.php");
-            exit;
+            // Verify password (in production use password_verify)
+            if ($password === $admin['password']) {
+                // Set session variables for admin
+                $_SESSION['user_id'] = $admin['id'];
+                $_SESSION['username'] = $admin['name'];
+                $_SESSION['role'] = 'admin';
+                
+                // Redirect to dashboard
+                header("Location: index.php");
+                exit;
+            } else {
+                $error = "Invalid phone number or password";
+            }
         } else {
             $error = "Invalid phone number or password";
         }
     } else {
-        // Try teacher login if admin login fails
+        // Teacher login attempt
         $teacherQuery = "SELECT * FROM teachers WHERE phone_number = ?";
         $stmt = $conn->prepare($teacherQuery);
         $stmt->bind_param("s", $phone);
@@ -76,7 +81,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Emerald School Nexus</title>
+    <title><?php echo $isAdminLogin ? 'Admin Login' : 'Teacher Login'; ?> - Emerald School Nexus</title>
     <meta name="description" content="School Management System - Login">
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/login.css">
@@ -84,11 +89,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="login-page">
+    <div class="login-header-actions">
+        <?php if (!$isAdminLogin): ?>
+            <a href="login.php?admin=1" class="btn btn-secondary admin-login-btn">
+                <i class="fas fa-user-shield"></i> Admin Login
+            </a>
+        <?php else: ?>
+            <a href="login.php" class="btn btn-secondary teacher-login-btn">
+                <i class="fas fa-chalkboard-teacher"></i> Teacher Login
+            </a>
+        <?php endif; ?>
+    </div>
+
     <div class="login-container">
         <div class="login-card">
             <div class="login-header">
                 <h1>Emerald School Nexus</h1>
-                <p>Teacher/Admin Login</p>
+                <p><?php echo $isAdminLogin ? 'Administrator Login' : 'Teacher Login'; ?></p>
             </div>
             
             <?php if (!empty($error)): ?>
@@ -97,7 +114,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </div>
             <?php endif; ?>
             
-            <form method="POST" action="login.php" class="login-form">
+            <form method="POST" action="login.php<?php echo $isAdminLogin ? '?admin=1' : ''; ?>" class="login-form">
                 <div class="form-group">
                     <label for="phone">Phone Number</label>
                     <div class="input-with-icon">

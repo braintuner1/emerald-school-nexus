@@ -54,4 +54,12 @@ document.addEventListener('DOMContentLoaded', function() {
       // If all validations pass, the form will submit normally
     });
   }
+  
+  // Check if we're on admin login or teacher login
+  const isAdminLogin = window.location.search.includes('admin=1');
+  const loginHeader = document.querySelector('.login-header p');
+  
+  if (loginHeader) {
+    loginHeader.textContent = isAdminLogin ? 'Administrator Login' : 'Teacher Login';
+  }
 });

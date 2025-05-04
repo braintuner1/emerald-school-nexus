@@ -35,6 +35,10 @@ function isLoggedIn() {
 // Redirect if not logged in
 function requireLogin() {
     if (!isLoggedIn()) {
+        // Save the requested URL for redirection after login
+        if (!empty($_SERVER['REQUEST_URI']) && $_SERVER['REQUEST_URI'] != '/login.php') {
+            $_SESSION['redirect_after_login'] = $_SERVER['REQUEST_URI'];
+        }
         header("Location: login.php");
         exit;
     }
@@ -98,5 +102,23 @@ function getFlashMessage() {
         return $flash;
     }
     return null;
+}
+
+// Check if the current page requires authentication
+$publicPages = ['login.php', 'assets', 'logout.php'];
+$currentPage = basename($_SERVER['PHP_SELF']);
+$isPublicPage = false;
+
+// Check if current page is public
+foreach ($publicPages as $page) {
+    if (strpos($currentPage, $page) === 0) {
+        $isPublicPage = true;
+        break;
+    }
+}
+
+// Force login for non-public pages
+if (!$isPublicPage && !isLoggedIn()) {
+    requireLogin();
 }
 ?>
