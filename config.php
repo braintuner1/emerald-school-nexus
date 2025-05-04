@@ -40,8 +40,27 @@ function requireLogin() {
     }
 }
 
+// Check if user is admin
+function isAdmin() {
+    return isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
+}
+
+// Require admin role
+function requireAdmin() {
+    requireLogin();
+    if (!isAdmin()) {
+        setFlashMessage('error', 'Access denied. Admin privileges required.');
+        header("Location: index.php");
+        exit;
+    }
+}
+
 // Check if user has permission to access a specific subject
 function hasSubjectPermission($subject) {
+    if (isAdmin()) {
+        return true;
+    }
+    
     if (!isset($_SESSION['subjects_taught'])) {
         return false;
     }
@@ -52,6 +71,10 @@ function hasSubjectPermission($subject) {
 
 // Check if user has permission to access a specific class
 function hasClassPermission($class) {
+    if (isAdmin()) {
+        return true;
+    }
+    
     if (!isset($_SESSION['class_assigned'])) {
         return false;
     }

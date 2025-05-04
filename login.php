@@ -15,24 +15,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $phone = sanitizeInput($_POST['phone']);
     $password = $_POST['password'];
     
-    // Validate against the teachers database
-    $query = "SELECT * FROM teachers WHERE phone_number = ?";
-    $stmt = $conn->prepare($query);
+    // First try admin login
+    $adminQuery = "SELECT * FROM admins WHERE phone_number = ?";
+    $stmt = $conn->prepare($adminQuery);
     $stmt->bind_param("s", $phone);
     $stmt->execute();
     $result = $stmt->get_result();
     
     if ($result->num_rows == 1) {
-        $teacher = $result->fetch_assoc();
+        $admin = $result->fetch_assoc();
         
         // Verify password (in production use password_verify)
-        if ($password === $teacher['password']) {
-            // Set session variables
-            $_SESSION['user_id'] = $teacher['id'];
-            $_SESSION['username'] = $teacher['name'];
-            $_SESSION['role'] = 'teacher';
-            $_SESSION['subjects_taught'] = $teacher['subjects_taught'];
-            $_SESSION['class_assigned'] = $teacher['class_assigned'];
+        if ($password === $admin['password']) {
+            // Set session variables for admin
+            $_SESSION['user_id'] = $admin['id'];
+            $_SESSION['username'] = $admin['name'];
+            $_SESSION['role'] = 'admin';
             
             // Redirect to dashboard
             header("Location: index.php");
@@ -41,7 +39,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $error = "Invalid phone number or password";
         }
     } else {
-        $error = "Invalid phone number or password";
+        // Try teacher login if admin login fails
+        $teacherQuery = "SELECT * FROM teachers WHERE phone_number = ?";
+        $stmt = $conn->prepare($teacherQuery);
+        $stmt->bind_param("s", $phone);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows == 1) {
+            $teacher = $result->fetch_assoc();
+            
+            // Verify password (in production use password_verify)
+            if ($password === $teacher['password']) {
+                // Set session variables
+                $_SESSION['user_id'] = $teacher['id'];
+                $_SESSION['username'] = $teacher['name'];
+                $_SESSION['role'] = 'teacher';
+                $_SESSION['subjects_taught'] = $teacher['subjects_taught'];
+                $_SESSION['class_assigned'] = $teacher['class_assigned'];
+                
+                // Redirect to dashboard
+                header("Location: index.php");
+                exit;
+            } else {
+                $error = "Invalid phone number or password";
+            }
+        } else {
+            $error = "Invalid phone number or password";
+        }
     }
 }
 ?>
@@ -63,7 +88,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="login-card">
             <div class="login-header">
                 <h1>Emerald School Nexus</h1>
-                <p>Teacher Login</p>
+                <p>Teacher/Admin Login</p>
             </div>
             
             <?php if (!empty($error)): ?>
