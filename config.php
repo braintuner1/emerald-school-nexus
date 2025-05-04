@@ -36,7 +36,7 @@ function isLoggedIn() {
 function requireLogin() {
     if (!isLoggedIn()) {
         // Save the requested URL for redirection after login
-        if (!empty($_SERVER['REQUEST_URI']) && $_SERVER['REQUEST_URI'] != '/login.php') {
+        if (!empty($_SERVER['REQUEST_URI']) && !in_array(basename($_SERVER['REQUEST_URI']), ['login.php', 'logout.php'])) {
             $_SESSION['redirect_after_login'] = $_SERVER['REQUEST_URI'];
         }
         header("Location: login.php");

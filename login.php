@@ -34,8 +34,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $_SESSION['username'] = $admin['name'];
                 $_SESSION['role'] = 'admin';
                 
-                // Redirect to dashboard
-                header("Location: index.php");
+                // Redirect to dashboard or saved redirect URL
+                $redirect = isset($_SESSION['redirect_after_login']) ? $_SESSION['redirect_after_login'] : 'index.php';
+                unset($_SESSION['redirect_after_login']);
+                header("Location: " . $redirect);
                 exit;
             } else {
                 $error = "Invalid phone number or password";
@@ -63,8 +65,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $_SESSION['subjects_taught'] = $teacher['subjects_taught'];
                 $_SESSION['class_assigned'] = $teacher['class_assigned'];
                 
-                // Redirect to dashboard
-                header("Location: index.php");
+                // Redirect to dashboard or saved redirect URL
+                $redirect = isset($_SESSION['redirect_after_login']) ? $_SESSION['redirect_after_login'] : 'index.php';
+                unset($_SESSION['redirect_after_login']);
+                header("Location: " . $redirect);
                 exit;
             } else {
                 $error = "Invalid phone number or password";
