@@ -3,6 +3,17 @@
 require_once 'config.php';
 requireLogin();
 
+// Check if user is a teacher
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'teacher') {
+    setFlashMessage('error', 'Access denied. Only teachers can access this page.');
+    header("Location: index.php");
+    exit;
+}
+
+// Get teacher's assigned subjects and classes
+$teacherSubjects = isset($_SESSION['subjects_taught']) ? explode(',', $_SESSION['subjects_taught']) : [];
+$teacherClasses = isset($_SESSION['class_assigned']) ? explode(',', $_SESSION['class_assigned']) : [];
+
 // Set page variables
 $pageTitle = 'Student Marks - Emerald School Nexus';
 $pageDescription = 'Upload and manage student marks';
@@ -20,7 +31,6 @@ $headerAction = '<button class="btn btn-primary" id="saveMarksBtn">
 include 'includes/header.php';
 ?>
 
-<!-- Class and Subject Selection -->
 <div class="card mb-6">
   <div class="card-content">
     <div class="filter-group-container">
@@ -46,10 +56,9 @@ include 'includes/header.php';
         <label for="classFilter">Class:</label>
         <select id="classFilter" class="form-select">
           <option value="">Select Class</option>
-          <option value="Form 1">Form 1</option>
-          <option value="Form 2">Form 2</option>
-          <option value="Form 3">Form 3</option>
-          <option value="Form 4">Form 4</option>
+          <?php foreach ($teacherClasses as $class): ?>
+            <option value="<?php echo $class; ?>"><?php echo $class; ?></option>
+          <?php endforeach; ?>
         </select>
       </div>
       
@@ -64,6 +73,9 @@ include 'includes/header.php';
         <label for="subjectFilter">Subject:</label>
         <select id="subjectFilter" class="form-select" disabled>
           <option value="">Select Subject</option>
+          <?php foreach ($teacherSubjects as $subject): ?>
+            <option value="<?php echo $subject; ?>"><?php echo $subject; ?></option>
+          <?php endforeach; ?>
         </select>
       </div>
       

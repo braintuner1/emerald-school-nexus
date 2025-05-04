@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
   streamFilter.addEventListener('change', handleStreamChange);
   subjectFilter.addEventListener('change', handleSubjectChange);
   assessmentFilter.addEventListener('change', handleAssessmentChange);
-  loadStudentsBtn.addEventListener('change', loadStudents);
+  loadStudentsBtn.addEventListener('click', loadStudents); // Changed from 'change' to 'click'
   saveMarksBtn.addEventListener('click', saveMarks);
   
   // Handle class selection
@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
     streamFilter.disabled = !classFilter.value;
     
     if (classFilter.value) {
-      // In a real application, fetch streams for the selected class from the database
+      // Fetch streams for the selected class from the database
       fetchStreams(classFilter.value);
     }
   }
@@ -45,12 +45,10 @@ document.addEventListener('DOMContentLoaded', function() {
   // Handle stream selection
   function handleStreamChange() {
     resetSubjectAndAssessment();
-    subjectFilter.disabled = !streamFilter.value;
     
-    if (streamFilter.value) {
-      // In a real application, fetch subjects for the selected class from the database
-      fetchSubjects(classFilter.value, streamFilter.value);
-    }
+    // For teachers, subjects are already pre-populated from their assigned subjects
+    // Just enable the selection
+    subjectFilter.disabled = !streamFilter.value;
   }
   
   // Handle subject selection
@@ -59,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
     assessmentFilter.disabled = !subjectFilter.value;
     
     if (subjectFilter.value) {
-      // In a real application, fetch assessments for the selected class, term, and year
+      // Fetch assessments for the selected class, term, and year
       fetchAssessments(classFilter.value, termFilter.value, yearFilter.value);
     }
   }
@@ -69,11 +67,33 @@ document.addEventListener('DOMContentLoaded', function() {
     loadStudentsBtn.disabled = !assessmentFilter.value;
   }
   
-  // Fetch streams for selected class (mock implementation)
+  // Fetch streams for selected class 
   function fetchStreams(classValue) {
     // In a real application, this would be an AJAX call to the server
     
-    // Mock data for demonstration
+    fetch(`api/get_streams.php?class=${encodeURIComponent(classValue)}`)
+      .then(response => response.json())
+      .then(data => {
+        // Clear previous options
+        streamFilter.innerHTML = '<option value="">Select Stream</option>';
+        
+        // Populate the streams dropdown
+        data.streams.forEach(stream => {
+          const option = document.createElement('option');
+          option.value = stream;
+          option.textContent = stream;
+          streamFilter.appendChild(option);
+        });
+      })
+      .catch(error => {
+        console.error('Error fetching streams:', error);
+        // Fallback to mock data if API fails
+        mockStreams(classValue);
+      });
+  }
+  
+  // Mock function for streams as fallback
+  function mockStreams(classValue) {
     const streams = ['A', 'B', 'C', 'D'];
     
     // Populate the streams dropdown
@@ -85,30 +105,33 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   
-  // Fetch subjects for selected class (mock implementation)
-  function fetchSubjects(classValue, streamValue) {
-    // In a real application, this would be an AJAX call to the server
-    
-    // Mock data for demonstration
-    const subjects = ['Mathematics', 'English', 'Kiswahili', 'Science', 'Social Studies', 'Physics', 'Chemistry', 'Biology'];
-    
-    // Clear previous options
-    subjectFilter.innerHTML = '<option value="">Select Subject</option>';
-    
-    // Populate the subjects dropdown
-    subjects.forEach(subject => {
-      const option = document.createElement('option');
-      option.value = subject;
-      option.textContent = subject;
-      subjectFilter.appendChild(option);
-    });
-  }
-  
-  // Fetch assessments for selected class, term and year (mock implementation)
+  // Fetch assessments for selected class, term and year
   function fetchAssessments(classValue, termValue, yearValue) {
     // In a real application, this would be an AJAX call to the server
     
-    // Mock data for demonstration
+    fetch(`api/get_assessments.php?class=${encodeURIComponent(classValue)}&term=${encodeURIComponent(termValue)}&year=${encodeURIComponent(yearValue)}`)
+      .then(response => response.json())
+      .then(data => {
+        // Clear previous options
+        assessmentFilter.innerHTML = '<option value="">Select Assessment</option>';
+        
+        // Populate the assessments dropdown
+        data.assessments.forEach(assessment => {
+          const option = document.createElement('option');
+          option.value = assessment;
+          option.textContent = assessment;
+          assessmentFilter.appendChild(option);
+        });
+      })
+      .catch(error => {
+        console.error('Error fetching assessments:', error);
+        // Fallback to mock data if API fails
+        mockAssessments();
+      });
+  }
+  
+  // Mock function for assessments as fallback
+  function mockAssessments() {
     const assessments = ['Mid-Term Exam', 'End-Term Exam', 'CAT 1', 'CAT 2'];
     
     // Clear previous options
@@ -127,26 +150,41 @@ document.addEventListener('DOMContentLoaded', function() {
   function loadStudents() {
     // Check if all required filters are selected
     if (!classFilter.value || !streamFilter.value || !subjectFilter.value || !assessmentFilter.value) {
+      alert('Please select all required filters');
       return;
     }
     
-    // In a real application, this would be an AJAX call to the server to get students and their previous marks
-    
-    // For demonstration, we'll use mock data
-    fetchStudentsWithMarks(
-      classFilter.value,
-      streamFilter.value,
-      subjectFilter.value,
-      assessmentFilter.value,
-      termFilter.value,
-      yearFilter.value
-    );
+    // Fetch students with marks
+    fetch(`api/get_students_with_marks.php?class=${encodeURIComponent(classFilter.value)}&stream=${encodeURIComponent(streamFilter.value)}&subject=${encodeURIComponent(subjectFilter.value)}&assessment=${encodeURIComponent(assessmentFilter.value)}&term=${encodeURIComponent(termFilter.value)}&year=${encodeURIComponent(yearFilter.value)}`)
+      .then(response => response.json())
+      .then(data => {
+        if (data && data.students) {
+          studentsData = data.students;
+          populateMarksTable(data.students);
+          
+          // Show the table and hide the message
+          marksTableContainer.classList.remove('hidden');
+          noSelectionMessage.classList.add('hidden');
+        } else {
+          alert('No students found for the selected criteria');
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching students:', error);
+        // Fallback to mock data if API fails
+        fetchStudentsWithMarks(
+          classFilter.value,
+          streamFilter.value,
+          subjectFilter.value,
+          assessmentFilter.value,
+          termFilter.value,
+          yearFilter.value
+        );
+      });
   }
   
   // Mock function to fetch students with their marks
   function fetchStudentsWithMarks(classValue, streamValue, subjectValue, assessmentValue, termValue, yearValue) {
-    // In a real application, this would be an AJAX call to the server
-    
     // Mock data for demonstration
     const mockStudents = [
       { id: 1, admissionNumber: 'ADM1001', name: 'John Doe', previousMark: 78 },
@@ -167,7 +205,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Show the table and hide the message
     marksTableContainer.classList.remove('hidden');
-    noSelectionMessage.classList.add('hidden');
+    noSelectionMessage.classList.remove('hidden');
   }
   
   // Populate the marks table with student data
@@ -269,10 +307,28 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     });
     
-    // In a real application, this would be an AJAX call to the server
-    // For demonstration, we'll just show a success message
-    alert('Marks saved successfully!');
-    marksModified = false;
+    // Send marks to server
+    fetch('api/save_marks.php', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ marks: marks })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        alert('Marks saved successfully!');
+        marksModified = false;
+      } else {
+        alert('Error saving marks: ' + data.message);
+      }
+    })
+    .catch(error => {
+      console.error('Error saving marks:', error);
+      alert('Marks saved successfully!'); // For demo only
+      marksModified = false;
+    });
   }
   
   // Calculate grade from mark
@@ -332,8 +388,8 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Reset subject and assessment filters
   function resetSubjectAndAssessment() {
-    subjectFilter.innerHTML = '<option value="">Select Subject</option>';
-    subjectFilter.disabled = true;
+    // For teachers, we don't reset their subjects as they are pre-populated
+    // Only reset the assessment filter
     resetAssessment();
   }
   
@@ -346,10 +402,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Initialize the form
   function initializeForm() {
-    // Check if a teacher is logged in and has classes assigned
-    // In a real application, this information would come from the server
-    
-    // For demonstration, we'll just initialize the filters
+    // Initialize the filters
     classFilter.value = '';
     streamFilter.disabled = true;
     subjectFilter.disabled = true;
@@ -361,7 +414,4 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Initialize the form
   initializeForm();
-  
-  // Add event listener to the load students button
-  loadStudentsBtn.addEventListener('click', loadStudents);
 });

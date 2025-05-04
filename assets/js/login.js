@@ -30,20 +30,18 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   
-  // Form validation example
+  // Form validation for login
   const loginForm = document.querySelector('.login-form');
   
   if (loginForm) {
     loginForm.addEventListener('submit', function(e) {
-      // This is a frontend validation example
-      // The actual authentication happens in the PHP file
-      
-      const username = document.getElementById('username').value.trim();
+      // Frontend validation
+      const phone = document.getElementById('phone').value.trim();
       const password = document.getElementById('password').value;
       
-      if (username === '') {
+      if (phone === '') {
         e.preventDefault();
-        alert('Please enter your username');
+        alert('Please enter your phone number');
         return;
       }
       

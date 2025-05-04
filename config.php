@@ -40,6 +40,26 @@ function requireLogin() {
     }
 }
 
+// Check if user has permission to access a specific subject
+function hasSubjectPermission($subject) {
+    if (!isset($_SESSION['subjects_taught'])) {
+        return false;
+    }
+    
+    $allowedSubjects = explode(',', $_SESSION['subjects_taught']);
+    return in_array($subject, $allowedSubjects);
+}
+
+// Check if user has permission to access a specific class
+function hasClassPermission($class) {
+    if (!isset($_SESSION['class_assigned'])) {
+        return false;
+    }
+    
+    $allowedClasses = explode(',', $_SESSION['class_assigned']);
+    return in_array($class, $allowedClasses);
+}
+
 // Flash messages
 function setFlashMessage($type, $message) {
     $_SESSION['flash'] = [

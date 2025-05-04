@@ -12,22 +12,36 @@ $error = '';
 
 // Handle login form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = sanitizeInput($_POST['username']);
+    $phone = sanitizeInput($_POST['phone']);
     $password = $_POST['password'];
     
-    // In a real application, you would validate against a database
-    // For this example, we'll use a hardcoded username and password
-    if ($username === 'admin' && $password === 'password') {
-        // Set session variables
-        $_SESSION['user_id'] = 1;
-        $_SESSION['username'] = $username;
-        $_SESSION['role'] = 'administrator';
+    // Validate against the teachers database
+    $query = "SELECT * FROM teachers WHERE phone_number = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("s", $phone);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows == 1) {
+        $teacher = $result->fetch_assoc();
         
-        // Redirect to dashboard
-        header("Location: index.php");
-        exit;
+        // Verify password (in production use password_verify)
+        if ($password === $teacher['password']) {
+            // Set session variables
+            $_SESSION['user_id'] = $teacher['id'];
+            $_SESSION['username'] = $teacher['name'];
+            $_SESSION['role'] = 'teacher';
+            $_SESSION['subjects_taught'] = $teacher['subjects_taught'];
+            $_SESSION['class_assigned'] = $teacher['class_assigned'];
+            
+            // Redirect to dashboard
+            header("Location: index.php");
+            exit;
+        } else {
+            $error = "Invalid phone number or password";
+        }
     } else {
-        $error = "Invalid username or password";
+        $error = "Invalid phone number or password";
     }
 }
 ?>
@@ -49,7 +63,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="login-card">
             <div class="login-header">
                 <h1>Emerald School Nexus</h1>
-                <p>Sign in to continue</p>
+                <p>Teacher Login</p>
             </div>
             
             <?php if (!empty($error)): ?>
@@ -60,10 +74,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             
             <form method="POST" action="login.php" class="login-form">
                 <div class="form-group">
-                    <label for="username">Username</label>
+                    <label for="phone">Phone Number</label>
                     <div class="input-with-icon">
-                        <i class="fas fa-user"></i>
-                        <input type="text" id="username" name="username" required>
+                        <i class="fas fa-phone"></i>
+                        <input type="text" id="phone" name="phone" placeholder="Enter your phone number" required>
                     </div>
                 </div>
                 
@@ -71,7 +85,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <label for="password">Password</label>
                     <div class="input-with-icon">
                         <i class="fas fa-lock"></i>
-                        <input type="password" id="password" name="password" required>
+                        <input type="password" id="password" name="password" placeholder="Enter your password" required>
                     </div>
                 </div>
                 
